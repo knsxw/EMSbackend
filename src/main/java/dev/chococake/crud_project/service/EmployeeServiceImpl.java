@@ -8,6 +8,9 @@ import dev.chococake.crud_project.repository.EmployeeRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService{
@@ -26,6 +29,31 @@ public class EmployeeServiceImpl implements EmployeeService{
         Employee employee = employeeRepository.findById(employeeID)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee with id " + employeeID + " not found"));
         return EmployeeMapper.mapToEmployeeDto(employee);
+    }
+
+    @Override
+    public List<EmployeeDto> getAllEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+        return employees.stream().map(EmployeeMapper::mapToEmployeeDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public EmployeeDto updateEmployee(Long employeeID, EmployeeDto updatedemployeeDto) {
+        Employee employee = employeeRepository.findById(employeeID).orElseThrow(
+                () -> new ResourceNotFoundException("Employee with id " + employeeID + " not found"));
+        employee.setFirstName(updatedemployeeDto.getFirstName());
+        employee.setLastName(updatedemployeeDto.getLastName());
+        employee.setEmail(updatedemployeeDto.getEmail());
+        Employee savedEmployee = employeeRepository.save(employee);
+        return EmployeeMapper.mapToEmployeeDto(savedEmployee);
+    }
+
+    @Override
+    public void deleteEmployee(Long employeeID) {
+        Employee employee = employeeRepository.findById(employeeID).orElseThrow(
+                () -> new ResourceNotFoundException("Employee with id " + employeeID + " not found"));
+        employeeRepository.deleteById(employeeID);
     }
 
 
